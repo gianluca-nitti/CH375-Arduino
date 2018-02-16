@@ -25,52 +25,52 @@
 #define CH375_USB_ENDPOINT_DESCRIPTOR 0x05
 
 typedef struct __attribute__((__packed__)) {
-    byte bLength;
-    byte bDescriptorType;
-    unsigned short bcdUSB;
-    byte bDeviceClass;
-    byte bDeviceSubClass;
-    byte bDeviceProtocol;
-    byte bMaxPacketSize;
-    unsigned short idVendor;
-    unsigned short idProduct;
-    unsigned short bcdDevice;
-    byte iManufacturer;
-    byte iProduct;
-    byte iSerialNumber;
-    byte bNumConfigurations;
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint16_t bcdUSB;
+    uint8_t bDeviceClass;
+    uint8_t bDeviceSubClass;
+    uint8_t bDeviceProtocol;
+    uint8_t bMaxPacketSize;
+    uint16_t idVendor;
+    uint16_t idProduct;
+    uint16_t bcdDevice;
+    uint8_t iManufacturer;
+    uint8_t iProduct;
+    uint8_t iSerialNumber;
+    uint8_t bNumConfigurations;
 } USBDeviceDescriptor;
 
 typedef struct __attribute__((__packed__)) {
-  byte bLength;
-  byte bDescriptorType;
-  unsigned short wTotalLength;
-  byte bNumInterfaces;
-  byte bConfigurationValue;
-  byte iConfiguration;
-  byte bmAttributes;
-  byte bMaxPower;
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint16_t wTotalLength;
+  uint8_t bNumInterfaces;
+  uint8_t bConfigurationValue;
+  uint8_t iConfiguration;
+  uint8_t bmAttributes;
+  uint8_t bMaxPower;
 } USBConfigurationDescriptor;
 
 typedef struct __attribute__((__packed__)) {
-  byte bLength;
-  byte bDescriptorType;
-  byte bInterfaceNumber;
-  byte bAlternateSetting;
-  byte bNumEndpoints;
-  byte bInterfaceClass;
-  byte bInterfaceSubClass;
-  byte bInterfaceProtocol;
-  byte iInterface;
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bInterfaceNumber;
+  uint8_t bAlternateSetting;
+  uint8_t bNumEndpoints;
+  uint8_t bInterfaceClass;
+  uint8_t bInterfaceSubClass;
+  uint8_t bInterfaceProtocol;
+  uint8_t iInterface;
 } USBInterfaceDescriptor;
 
 typedef struct __attribute__((__packed__)) {
-  byte bLength;
-  byte bDescriptorType;
-  byte bEndpointAddress;
-  byte bmAttributes;
-  unsigned short wMaxPacketSize;
-  byte bInterval;
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bEndpointAddress;
+  uint8_t bmAttributes;
+  uint16_t wMaxPacketSize;
+  uint8_t bInterval;
 } USBEndpointDescriptor;
 
 typedef struct __attribute__((__packed__)) {
@@ -83,19 +83,19 @@ class CH375 {
   private:
     Stream& stream;
     int interruptPin;
-    void sendCommand(byte b);
-    void sendData(byte b);
-    byte receive();
-    bool execCommand(byte cmd, byte arg);
-    byte waitInterrupt();
-    void rd_usb_data(byte* buf, size_t maxLen);
-    bool getDescriptor(byte descriptorType);
+    void sendCommand(uint8_t b);
+    void sendData(uint8_t b);
+    uint8_t receive();
+    bool execCommand(uint8_t cmd, uint8_t arg);
+    uint8_t waitInterrupt();
+    void rd_usb_data(uint8_t* buf, size_t maxLen);
+    bool getDescriptor(uint8_t descriptorType);
   public:
     CH375(Stream& _stream, int _interruptPin);
     bool init();
-    byte getChipVersion();
+    uint8_t getChipVersion();
     bool resetAndGetDeviceDescriptor(USBDeviceDescriptor* result);
-    bool setAddress(byte address);
+    bool setAddress(uint8_t address);
     bool getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result);
-    bool setConfiguration(byte configuration);
+    bool setConfiguration(uint8_t configuration);
 };

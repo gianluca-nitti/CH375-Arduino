@@ -3,7 +3,7 @@
 CH375::CH375(Stream& _stream, int _interruptPin): stream(_stream), interruptPin(_interruptPin) {
 }
 
-void CH375::sendCommand(byte b) {
+void CH375::sendCommand(uint8_t b) {
   delay(2);
   Serial.print("Sending: 0x");
   Serial.println(b, HEX);
@@ -11,17 +11,17 @@ void CH375::sendCommand(byte b) {
   delay(2);
 }
 
-void CH375::sendData(byte b) {
+void CH375::sendData(uint8_t b) {
   stream.write(b);
   Serial.print("Sending: 0x");
   Serial.println(b, HEX);
   delay(2);
 }
 
-byte CH375::receive() {
+uint8_t CH375::receive() {
   delayMicroseconds(1);
   while (stream.available() <= 0) yield();
-  byte b = stream.read();
+  uint8_t b = stream.read();
   Serial.print("Received: 0x");
   Serial.println(b, HEX);
   return b;
@@ -35,36 +35,36 @@ bool CH375::init() {
   return receive() == 0x33;
 }
 
-byte CH375::getChipVersion() {
+uint8_t CH375::getChipVersion() {
   sendCommand(CH375_CMD_GET_IC_VER);
   return receive();
 }
 
-bool CH375::execCommand(byte cmd, byte arg) {
+bool CH375::execCommand(uint8_t cmd, uint8_t arg) {
   sendCommand(cmd);
   sendData(arg);
   delayMicroseconds(20);
   return receive() == CH375_CMD_RET_SUCCESS;
 }
 
-byte CH375::waitInterrupt() {
+uint8_t CH375::waitInterrupt() {
   while (digitalRead(interruptPin) != LOW) yield();
   sendCommand(CH375_CMD_GET_STATUS);
   return receive();
 }
 
-void CH375::rd_usb_data(byte* buf, size_t maxLen) {
+void CH375::rd_usb_data(uint8_t* buf, size_t maxLen) {
   sendCommand(CH375_CMD_RD_USB_DATA);
-  byte len = receive();
-  for (byte i = 0; i < len; i++) {
-    byte data = receive();
+  uint8_t len = receive();
+  for (uint8_t i = 0; i < len; i++) {
+    uint8_t data = receive();
     if (i < maxLen) {
       buf[i] = data;
     }
   }
 }
 
-bool CH375::getDescriptor(byte descriptorType) {
+bool CH375::getDescriptor(uint8_t descriptorType) {
   sendCommand(CH375_CMD_GET_DESCR);
   sendData(descriptorType);
   return waitInterrupt() == CH375_USB_INT_SUCCESS;
@@ -80,13 +80,13 @@ bool CH375::resetAndGetDeviceDescriptor(USBDeviceDescriptor* result) {
   while (waitInterrupt() != CH375_USB_INT_CONNECT) yield(); //wait for device to come back online after reset
   delay(200);
   if (!getDescriptor(CH375_USB_DEVICE_DESCRIPTOR)) return false;
-  rd_usb_data((byte*)result, sizeof(USBDeviceDescriptor));
+  rd_usb_data((uint8_t*)result, sizeof(USBDeviceDescriptor));
   return result->bLength >= 18 //device descriptor length should be 18
           && result->bDescriptorType == CH375_USB_DEVICE_DESCRIPTOR //ensure it's actually a device descriptor
           && result->bNumConfigurations == 1; //devices with more than 1 configuration are not supported (for now at least)
 }
 
-bool CH375::setAddress(byte address) {
+bool CH375::setAddress(uint8_t address) {
   if (address & 0b10000000) return false; //first bit must be zero (USB addresses are 7 bit long)
   sendCommand(CH375_CMD_SET_ADDRESS); //assign this address to the device
   sendData(address);
@@ -99,14 +99,14 @@ bool CH375::setAddress(byte address) {
 
 bool CH375::getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result) {
   if(!getDescriptor(CH375_USB_CONFIGURATION_DESCRIPTOR)) return false;
-  rd_usb_data((byte*)result, sizeof(USBConfigurationDescriptorFull));
+  rd_usb_data((uint8_t*)result, sizeof(USBConfigurationDescriptorFull));
   return result->configuration.bDescriptorType == CH375_USB_CONFIGURATION_DESCRIPTOR //ensure configuration descriptor is actually a configuration descriptor
           && result->configuration.bNumInterfaces == 1 //only one interface is supported (for now at least)
           && result->interface.bDescriptorType == CH375_USB_INTERFACE_DESCRIPTOR //ensure interface descriptor is actually an interface descriptor
           && result->interface.bNumEndpoints <= 4; //a maximum of 4 endpoints are supported
 }
 
-bool CH375::setConfiguration(byte configuration) {
+bool CH375::setConfiguration(uint8_t configuration) {
   //TODO: set toggle send/toggle receive flag?
   sendCommand(CH375_CMD_SET_CONFIG);
   sendData(configuration);

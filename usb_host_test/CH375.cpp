@@ -100,9 +100,15 @@ bool CH375::setAddress(byte address) {
 bool CH375::getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result) {
   if(!getDescriptor(CH375_USB_CONFIGURATION_DESCRIPTOR)) return false;
   rd_usb_data((byte*)result, sizeof(USBConfigurationDescriptorFull));
-  return true;
   return result->configuration.bDescriptorType == CH375_USB_CONFIGURATION_DESCRIPTOR //ensure configuration descriptor is actually a configuration descriptor
           && result->configuration.bNumInterfaces == 1 //only one interface is supported (for now at least)
           && result->interface.bDescriptorType == CH375_USB_INTERFACE_DESCRIPTOR //ensure interface descriptor is actually an interface descriptor
           && result->interface.bNumEndpoints <= 4; //a maximum of 4 endpoints are supported
+}
+
+bool CH375::setConfiguration(byte configuration) {
+  //TODO: set toggle send/toggle receive flag?
+  sendCommand(CH375_CMD_SET_CONFIG);
+  sendData(configuration);
+  return waitInterrupt() == CH375_USB_INT_SUCCESS;
 }

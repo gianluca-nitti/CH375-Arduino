@@ -9,6 +9,7 @@
 #define CH375_CMD_RD_USB_DATA 0x28
 #define CH375_CMD_SET_ADDRESS 0x45
 #define CH375_CMD_GET_DESCR 0x46
+#define CH375_CMD_SET_CONFIG 0x49
 
 #define CH375_CMD_RET_SUCCESS 0x51
 
@@ -96,4 +97,5 @@ class CH375 {
     bool resetAndGetDeviceDescriptor(USBDeviceDescriptor* result);
     bool setAddress(byte address);
     bool getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result);
+    bool setConfiguration(byte configuration);
 };

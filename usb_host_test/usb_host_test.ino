@@ -56,6 +56,12 @@ void loop() {
         Serial.println("USB configuration descriptor read OK.");
         printHex("bInterfaceClass", configurationDescriptor.interface.bInterfaceClass);
         printHex("bInterfaceSubClass", configurationDescriptor.interface.bInterfaceSubClass);
+        Serial.println("Setting configuration...");
+        if (ch375.setConfiguration(configurationDescriptor.configuration.bConfigurationValue)) {
+          Serial.println("Configuration set");
+        } else {
+          Serial.println("Failed to set configuration");
+        }
       } else {
         Serial.println("Failed to read configuration descriptor");
       }

@@ -81,5 +81,28 @@ bool CH375::resetAndGetDeviceDescriptor(USBDeviceDescriptor* result) {
   delay(200);
   if (!getDescriptor(CH375_USB_DEVICE_DESCRIPTOR)) return false;
   rd_usb_data((byte*)result, sizeof(USBDeviceDescriptor));
+  return result->bLength >= 18 //device descriptor length should be 18
+          && result->bDescriptorType == CH375_USB_DEVICE_DESCRIPTOR //ensure it's actually a device descriptor
+          && result->bNumConfigurations == 1; //devices with more than 1 configuration are not supported (for now at least)
+}
+
+bool CH375::setAddress(byte address) {
+  if (address & 0b10000000) return false; //first bit must be zero (USB addresses are 7 bit long)
+  sendCommand(CH375_CMD_SET_ADDRESS); //assign this address to the device
+  sendData(address);
+  if (waitInterrupt() != CH375_USB_INT_SUCCESS) return false;
+  sendCommand(CH375_CMD_SET_USB_ADDR); //instruct the CH375 (USB host) to talk to the device with this address
+  sendData(address);
+  delay(5);
   return true;
+}
+
+bool CH375::getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result) {
+  if(!getDescriptor(CH375_USB_CONFIGURATION_DESCRIPTOR)) return false;
+  rd_usb_data((byte*)result, sizeof(USBConfigurationDescriptorFull));
+  return true;
+  return result->configuration.bDescriptorType == CH375_USB_CONFIGURATION_DESCRIPTOR //ensure configuration descriptor is actually a configuration descriptor
+          && result->configuration.bNumInterfaces == 1 //only one interface is supported (for now at least)
+          && result->interface.bDescriptorType == CH375_USB_INTERFACE_DESCRIPTOR //ensure interface descriptor is actually an interface descriptor
+          && result->interface.bNumEndpoints <= 4; //a maximum of 4 endpoints are supported
 }

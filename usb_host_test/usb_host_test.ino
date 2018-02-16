@@ -46,6 +46,22 @@ void loop() {
     printHex("iProduct", deviceDescriptor.iProduct);
     printHex("iSerialNumber", deviceDescriptor.iSerialNumber);
     printHex("bNumConfigurations", deviceDescriptor.bNumConfigurations);
+
+    Serial.println("Setting device address to 3...");
+    if (ch375.setAddress(3)) {
+      Serial.println("Address set");
+      Serial.println("Reading configuration descriptor...");
+      USBConfigurationDescriptorFull configurationDescriptor;
+      if (ch375.getFullConfigurationDescriptor(&configurationDescriptor)) {
+        Serial.println("USB configuration descriptor read OK.");
+        printHex("bInterfaceClass", configurationDescriptor.interface.bInterfaceClass);
+        printHex("bInterfaceSubClass", configurationDescriptor.interface.bInterfaceSubClass);
+      } else {
+        Serial.println("Failed to read configuration descriptor");
+      }
+    } else {
+      Serial.println("Failed to set address");
+    }
   } else {
     Serial.println("Failed");
   }

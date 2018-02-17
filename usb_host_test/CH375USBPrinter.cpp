@@ -13,14 +13,32 @@ bool CH375USBPrinter::init() {
   if (configurationDescriptor.interface.bInterfaceClass != USB_PRINTER_INTERFACE_CLASS
     || configurationDescriptor.interface.bInterfaceSubClass != USB_PRINTER_INTERFACE_SUBCLASS) return false;
   if (!ch375.setConfiguration(configurationDescriptor.configuration.bConfigurationValue)) return false;
-  // TODO: store endpoint address info
-  return true;
+  // find the OUT endpoint
+  for (uint8_t i = 0; i < configurationDescriptor.interface.bNumEndpoints; i++) {
+    // according to USB specification, the OUT endpoint's address most significant bit is 0;
+    // if there is an IN endpoint, it's address has the most significant bit set to 1
+    if ((configurationDescriptor.endpoints[i].bEndpointAddress & 0b10000000) == 0) {
+      // less significant 4 bits of the address are the endpoint number
+      outEndpointNumber = configurationDescriptor.endpoints[i].bEndpointAddress & 0x0F;
+      // the wMaxPacketSize field is 2 bytes large, but looks like the CH375 controller can only send up to 255 bytes
+      // because the CMD_WR_USB_DATA7 command takes a single byte as the first argument which must be the packet length;
+      // thus, if the printer supports larger packets, the bottleneck is the CH375
+      uint16_t maxPacketSize = configurationDescriptor.endpoints[i].wMaxPacketSize;
+      if (maxPacketSize & 0xFF00) { //most significant byte is not zero so the limit is the CH375
+        outEndpointMaxPacketSize = 255;
+      } else { //most significant byte is zero, so the printer supports packets of up to 255 bytes or less
+        outEndpointMaxPacketSize = (uint8_t) (maxPacketSize & 0x00FF);
+      }
+      return true;
+    }
+  }
+  return false; //no OUT endpoint found
 }
 
 uint8_t CH375USBPrinter::getPortStatus() {
   ch375.toggleHostEndpoint7(false);
   //TODO: refactor and document
-  uint8_t buf[8];
+  uint8_t buf[8] = {0};
   buf[0] = 0b10100001; //bmRequestType
   buf[1] = 1; //bRequest
   buf[6] = 1; //wLength
@@ -34,4 +52,21 @@ uint8_t CH375USBPrinter::getPortStatus() {
   ch375.wr_usb_data(NULL, 0); //send 0-length data to report that control transfer was successful
   if (!ch375.issueToken(0, USB_PID_OUT)) return 0xFF;
   return result;
+}
+
+bool CH375USBPrinter::sendData(uint8_t* buf, uint8_t len) {
+  while (len > 0) {
+    ch375.toggleHostEndpoint7(toggleSend);
+    uint8_t packetLen = len > outEndpointMaxPacketSize ? outEndpointMaxPacketSize : len;
+    ch375.wr_usb_data(buf, packetLen);
+    if (ch375.issueToken(outEndpointNumber, USB_PID_OUT)) {
+      len -= packetLen;
+      buf += packetLen;
+      toggleSend = !toggleSend;
+    } else {
+      return false;
+    }
+    //TODO: handle STALL and NAK situations
+  }
+  return true;
 }

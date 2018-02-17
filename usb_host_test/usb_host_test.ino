@@ -25,6 +25,13 @@ void printHex(String msg, int data) {
   Serial.println(data, HEX);
 }
 
+void waitSecs(int secs) {
+  for (int i = secs; i > 0; i--) {
+    Serial.printf("%d...", i);
+    delay(1000);
+  }
+}
+
 void loop() {
   delay(1000);
   Serial.print("Chip version: 0x");
@@ -50,16 +57,27 @@ void loop() {
     printHex("bNumConfigurations", deviceDescriptor.bNumConfigurations);
 
     Serial.println("Initializing as printer...");
-    if(printer.init()) {
-      Serial.println("Printer intiialization OK");
+    if (printer.init()) {
+      Serial.println("Printer intialization OK");
       Serial.println("Port status: ");
       Serial.println(printer.getPortStatus(), BIN);
+      Serial.println("Starting to print in ");
+      waitSecs(5);
+      // simple document in HP page description language
+      uint8_t dataToPrint[] = {0x1B, 'E', '\n', '\n', '\n', 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '\n', '\n', 0x1B, 'E'};
+      uint8_t len = sizeof(dataToPrint) / sizeof(dataToPrint[0]);
+      if(printer.sendData(dataToPrint, len)) {
+        Serial.println("Succesfully printed!");
+        while (true) delay(1000);
+      } else {
+        Serial.println("Failed to send data to the printer");
+      }
     } else {
       Serial.println("Failed");
     }
 
     /*Serial.println("Setting device address to 3...");
-    if (ch375.setAddress(3)) {
+      if (ch375.setAddress(3)) {
       Serial.println("Address set");
       Serial.println("Reading configuration descriptor...");
       USBConfigurationDescriptorFull configurationDescriptor;
@@ -76,15 +94,11 @@ void loop() {
       } else {
         Serial.println("Failed to read configuration descriptor");
       }
-    } else {
+      } else {
       Serial.println("Failed to set address");
-    }*/
+      }*/
   } else {
     Serial.println("Failed");
   }
-
-  for (int i = 10; i > 0; i--) {
-    Serial.printf("%d...", i);
-    delay(1000);
-  }
+  waitSecs(10);
 }

@@ -64,6 +64,14 @@ void CH375::rd_usb_data(uint8_t* buf, size_t maxLen) {
   }
 }
 
+void CH375::wr_usb_data(uint8_t* buf, size_t len) {
+  sendCommand(CH375_CMD_WR_USB_DATA7);
+  sendData(len);
+  for (int i = 0; i < len; i++) {
+    sendData(buf[i]);
+  }
+}
+
 bool CH375::getDescriptor(uint8_t descriptorType) {
   sendCommand(CH375_CMD_GET_DESCR);
   sendData(descriptorType);
@@ -107,8 +115,28 @@ bool CH375::getFullConfigurationDescriptor(USBConfigurationDescriptorFull* resul
 }
 
 bool CH375::setConfiguration(uint8_t configuration) {
-  //TODO: set toggle send/toggle receive flag?
   sendCommand(CH375_CMD_SET_CONFIG);
   sendData(configuration);
   return waitInterrupt() == CH375_USB_INT_SUCCESS;
+}
+
+bool CH375::issueToken(uint8_t targetEndpoint, uint8_t pid) {
+  if ((targetEndpoint & 0xF0) || (pid & 0xF0)) return false; //both arguments must be 4 bits long
+  sendCommand(CH375_CMD_ISSUE_TOKEN);
+  sendData((targetEndpoint << 4) | pid);
+  return waitInterrupt() == CH375_USB_INT_SUCCESS;
+}
+
+void CH375::toggleHostEndpoint(uint8_t setEndpointCommand, bool tog) {
+  sendCommand(setEndpointCommand);
+  sendData(tog ? 0xC0 : 0x80);
+  delay(2);
+}
+
+void CH375::toggleHostEndpoint6(bool tog) {
+  toggleHostEndpoint(CH375_CMD_SET_ENDP6, tog);
+}
+
+void CH375::toggleHostEndpoint7(bool tog) {
+  toggleHostEndpoint(CH375_CMD_SET_ENDP7, tog);
 }

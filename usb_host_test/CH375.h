@@ -5,11 +5,15 @@
 #define CH375_CMD_CHECK_EXIST 0x06
 #define CH375_CMD_SET_USB_ADDR 0x13
 #define CH375_CMD_SET_USB_MODE 0x15
+#define CH375_CMD_SET_ENDP6 0x1C
+#define CH375_CMD_SET_ENDP7 0x1D
 #define CH375_CMD_GET_STATUS 0x22
 #define CH375_CMD_RD_USB_DATA 0x28
+#define CH375_CMD_WR_USB_DATA7 0x2B
 #define CH375_CMD_SET_ADDRESS 0x45
 #define CH375_CMD_GET_DESCR 0x46
 #define CH375_CMD_SET_CONFIG 0x49
+#define CH375_CMD_ISSUE_TOKEN 0x4F
 
 #define CH375_CMD_RET_SUCCESS 0x51
 
@@ -88,14 +92,19 @@ class CH375 {
     uint8_t receive();
     bool execCommand(uint8_t cmd, uint8_t arg);
     uint8_t waitInterrupt();
-    void rd_usb_data(uint8_t* buf, size_t maxLen);
     bool getDescriptor(uint8_t descriptorType);
+    void toggleHostEndpoint(uint8_t setEndpointCommand, bool tog);
   public:
     CH375(Stream& _stream, int _interruptPin);
     bool init();
     uint8_t getChipVersion();
+    void rd_usb_data(uint8_t* buf, size_t maxLen);
+    void wr_usb_data(uint8_t* buf, size_t len);
     bool resetAndGetDeviceDescriptor(USBDeviceDescriptor* result);
     bool setAddress(uint8_t address);
     bool getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result);
     bool setConfiguration(uint8_t configuration);
+    bool issueToken(uint8_t targetEndpoint, uint8_t pid);
+    void toggleHostEndpoint6(bool tog);
+    void toggleHostEndpoint7(bool tog);
 };

@@ -28,6 +28,10 @@
 #define CH375_USB_INTERFACE_DESCRIPTOR 0x04
 #define CH375_USB_ENDPOINT_DESCRIPTOR 0x05
 
+#define USB_PID_OUT 0x01
+#define USB_PID_IN 0x09
+#define USB_PID_SETUP 0x0D
+
 typedef struct __attribute__((__packed__)) {
     uint8_t bLength;
     uint8_t bDescriptorType;

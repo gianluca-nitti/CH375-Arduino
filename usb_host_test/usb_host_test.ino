@@ -1,8 +1,10 @@
 #include <SoftwareSerial.h>
 #include "CH375.h";
+#include "CH375USBPrinter.h"
 
 SoftwareSerial swSer(D6, D3, false, 32);
 CH375 ch375(swSer, D4);
+CH375USBPrinter printer(ch375);
 
 void setup() {
   Serial.begin(115200);
@@ -47,7 +49,16 @@ void loop() {
     printHex("iSerialNumber", deviceDescriptor.iSerialNumber);
     printHex("bNumConfigurations", deviceDescriptor.bNumConfigurations);
 
-    Serial.println("Setting device address to 3...");
+    Serial.println("Initializing as printer...");
+    if(printer.init()) {
+      Serial.println("Printer intiialization OK");
+      Serial.println("Port status: ");
+      Serial.println(printer.getPortStatus(), BIN);
+    } else {
+      Serial.println("Failed");
+    }
+
+    /*Serial.println("Setting device address to 3...");
     if (ch375.setAddress(3)) {
       Serial.println("Address set");
       Serial.println("Reading configuration descriptor...");
@@ -67,7 +78,7 @@ void loop() {
       }
     } else {
       Serial.println("Failed to set address");
-    }
+    }*/
   } else {
     Serial.println("Failed");
   }

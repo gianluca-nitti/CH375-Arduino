@@ -1,29 +1,38 @@
 #include "CH375.h"
+//#define CH375_DEBUG
 
 CH375::CH375(Stream& _stream, int _interruptPin): stream(_stream), interruptPin(_interruptPin) {
 }
 
 void CH375::sendCommand(uint8_t b) {
-  delay(2);
+  delayMicroseconds(2);
+#ifdef CH375_DEBUG
   Serial.print("Sending: 0x");
   Serial.println(b, HEX);
+#endif
   stream.write(b);
-  delay(2);
+  delayMicroseconds(100);
 }
 
 void CH375::sendData(uint8_t b) {
-  stream.write(b);
+#ifdef CH375_DEBUG
   Serial.print("Sending: 0x");
   Serial.println(b, HEX);
-  delay(2);
+#endif
+  //unsigned long m = micros();
+  stream.write(b);
+  //m = micros() - m;
+  //Serial.println("Sending took " + String(m) + " us");
+  delayMicroseconds(100);
 }
 
 uint8_t CH375::receive() {
-  delayMicroseconds(1);
   while (stream.available() <= 0) yield();
   uint8_t b = stream.read();
+#ifdef CH375_DEBUG
   Serial.print("Received: 0x");
   Serial.println(b, HEX);
+#endif
   return b;
 }
 
@@ -33,6 +42,21 @@ bool CH375::init() {
   sendCommand(CH375_CMD_CHECK_EXIST);
   sendData(0xCC);
   return receive() == 0x33;
+}
+
+bool CH375::test() {
+  uint8_t b = random(0, 255);
+  sendCommand(CH375_CMD_CHECK_EXIST);
+  sendData(b);
+  return ((uint8_t) receive()) == ((uint8_t) ~b);
+}
+
+bool CH375::setBaudRate(int baudRate, std::function<void(int)> setLocalBaudRate) {
+  sendCommand(CH375_CMD_SET_BAUDRATE);
+  sendData(0x03);
+  sendData(0xCC); //TODO
+  setLocalBaudRate(baudRate);
+  return receive() == CH375_CMD_RET_SUCCESS;
 }
 
 uint8_t CH375::getChipVersion() {

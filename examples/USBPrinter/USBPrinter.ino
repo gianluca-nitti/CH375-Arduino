@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-#include "CH375.h";
+#include "CH375.h"
 #include "CH375USBPrinter.h"
 
 SoftwareSerial swSer(D6, D3, false, 32);

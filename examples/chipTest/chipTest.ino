@@ -16,7 +16,7 @@ void setup() {
     Serial.println("CH375 is not working properly");
     while (true) delay(1000);
   }
-  ch375.setBaudRate(115200, [](int localBaudRate){
+  ch375.setBaudRate(115200, [](){
     swSer.begin(115200);
   });
 }

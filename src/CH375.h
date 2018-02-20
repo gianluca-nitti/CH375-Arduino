@@ -104,7 +104,7 @@ class CH375 {
     CH375(Stream& _stream, int _interruptPin);
     bool init();
     bool test();
-    bool setBaudRate(int baudRate, std::function<void(int)> setLocalBaudRate);
+    bool setBaudRate(uint32_t baudRate, std::function<void(void)> setLocalBaudRate);
     uint8_t getChipVersion();
     void rd_usb_data(uint8_t* buf, size_t maxLen);
     void wr_usb_data(uint8_t* buf, size_t len);

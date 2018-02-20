@@ -20,13 +20,12 @@ bool CH375USBPrinter::init() {
     if ((configurationDescriptor.endpoints[i].bEndpointAddress & 0b10000000) == 0) {
       // less significant 4 bits of the address are the endpoint number
       outEndpointNumber = configurationDescriptor.endpoints[i].bEndpointAddress & 0x0F;
-      // the wMaxPacketSize field is 2 bytes large, but looks like the CH375 controller can only send up to 255 bytes
-      // because the CMD_WR_USB_DATA7 command takes a single byte as the first argument which must be the packet length;
+      // the wMaxPacketSize field is 2 bytes large, but the CH375 send buffer size is 64 bytes;
       // thus, if the printer supports larger packets, the bottleneck is the CH375
       uint16_t maxPacketSize = configurationDescriptor.endpoints[i].wMaxPacketSize;
-      if (maxPacketSize & 0xFF00) { //most significant byte is not zero so the limit is the CH375
-        outEndpointMaxPacketSize = 255;
-      } else { //most significant byte is zero, so the printer supports packets of up to 255 bytes or less
+      if (maxPacketSize > 64) {
+        outEndpointMaxPacketSize = 64;
+      } else {
         outEndpointMaxPacketSize = (uint8_t) (maxPacketSize & 0x00FF);
       }
       return true;

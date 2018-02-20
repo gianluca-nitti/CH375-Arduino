@@ -51,11 +51,11 @@ bool CH375::test() {
   return ((uint8_t) receive()) == ((uint8_t) ~b);
 }
 
-bool CH375::setBaudRate(int baudRate, std::function<void(int)> setLocalBaudRate) {
+bool CH375::setBaudRate(uint32_t baudRate, std::function<void()> setLocalBaudRate) {
   sendCommand(CH375_CMD_SET_BAUDRATE);
   sendData(0x03);
-  sendData(0xCC); //TODO
-  setLocalBaudRate(baudRate);
+  sendData((uint8_t) (256 - 6000000/baudRate)); //TODO: may be architecture-dependend, check on AVR
+  setLocalBaudRate();
   return receive() == CH375_CMD_RET_SUCCESS;
 }
 

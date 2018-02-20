@@ -14,5 +14,5 @@ class CH375USBPrinter {
     CH375USBPrinter(CH375& _ch375);
     bool init();
     uint8_t getPortStatus();
-    bool sendData(uint8_t* buf, uint8_t len); //TODO: replace all instances of size_t in CH375.h/.cpp with uint8_t
+    bool sendData(uint8_t* buf, uint8_t len);
 };

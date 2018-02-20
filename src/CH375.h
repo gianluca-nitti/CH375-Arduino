@@ -106,8 +106,8 @@ class CH375 {
     bool test();
     bool setBaudRate(uint32_t baudRate, std::function<void(void)> setLocalBaudRate);
     uint8_t getChipVersion();
-    void rd_usb_data(uint8_t* buf, size_t maxLen);
-    void wr_usb_data(uint8_t* buf, size_t len);
+    void rd_usb_data(uint8_t* buf, uint8_t maxLen);
+    void wr_usb_data(uint8_t* buf, uint8_t len);
     bool resetAndGetDeviceDescriptor(USBDeviceDescriptor* result);
     bool setAddress(uint8_t address);
     bool getFullConfigurationDescriptor(USBConfigurationDescriptorFull* result);

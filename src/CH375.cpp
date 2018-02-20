@@ -77,7 +77,7 @@ uint8_t CH375::waitInterrupt() {
   return receive();
 }
 
-void CH375::rd_usb_data(uint8_t* buf, size_t maxLen) {
+void CH375::rd_usb_data(uint8_t* buf, uint8_t maxLen) {
   sendCommand(CH375_CMD_RD_USB_DATA);
   uint8_t len = receive();
   for (uint8_t i = 0; i < len; i++) {
@@ -88,7 +88,7 @@ void CH375::rd_usb_data(uint8_t* buf, size_t maxLen) {
   }
 }
 
-void CH375::wr_usb_data(uint8_t* buf, size_t len) {
+void CH375::wr_usb_data(uint8_t* buf, uint8_t len) {
   sendCommand(CH375_CMD_WR_USB_DATA7);
   sendData(len);
   for (int i = 0; i < len; i++) {

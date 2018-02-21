@@ -8,11 +8,14 @@ class CH375USBPrinter {
   private:
     CH375& ch375;
     uint8_t outEndpointNumber;
-    uint8_t outEndpointMaxPacketSize;
-    bool toggleSend = false;
+    uint8_t packetSize;
+    uint8_t* buffer = NULL;
+    uint8_t bufIndex = 0;
   public:
     CH375USBPrinter(CH375& _ch375);
     bool init();
     uint8_t getPortStatus();
-    bool sendData(uint8_t* buf, uint8_t len);
+    bool write(uint8_t b);
+    bool flush();
+    ~CH375USBPrinter();
 };

@@ -93,6 +93,8 @@ class CH375 {
   private:
     Stream& stream;
     int interruptPin;
+    bool toggleSend = false; //toggle DATA0/DATA1 for sending
+
     void sendCommand(uint8_t b);
     void sendData(uint8_t b);
     uint8_t receive();
@@ -115,4 +117,5 @@ class CH375 {
     bool issueToken(uint8_t targetEndpoint, uint8_t pid);
     void toggleHostEndpoint6(bool tog);
     void toggleHostEndpoint7(bool tog);
+    bool doBulkOutTransfer(uint8_t targetEndpoint, uint8_t* buf, uint8_t len);
 };

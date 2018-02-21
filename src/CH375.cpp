@@ -19,10 +19,7 @@ void CH375::sendData(uint8_t b) {
   Serial.print("Sending: 0x");
   Serial.println(b, HEX);
 #endif
-  //unsigned long m = micros();
   stream.write(b);
-  //m = micros() - m;
-  //Serial.println("Sending took " + String(m) + " us");
   delayMicroseconds(100);
 }
 
@@ -67,7 +64,7 @@ uint8_t CH375::getChipVersion() {
 bool CH375::execCommand(uint8_t cmd, uint8_t arg) {
   sendCommand(cmd);
   sendData(arg);
-  delayMicroseconds(20);
+  delayMicroseconds(20); //TODO remove
   return receive() == CH375_CMD_RET_SUCCESS;
 }
 
@@ -163,4 +160,18 @@ void CH375::toggleHostEndpoint6(bool tog) {
 
 void CH375::toggleHostEndpoint7(bool tog) {
   toggleHostEndpoint(CH375_CMD_SET_ENDP7, tog);
+}
+
+bool CH375::doBulkOutTransfer(uint8_t targetEndpoint, uint8_t* buf, uint8_t len) {
+  if (len > 64) return false; //must not exceed CH375's send buffer size
+  toggleHostEndpoint7(toggleSend);
+  Serial.println("writing...");
+  wr_usb_data(buf, len);
+  Serial.println("issue token and waiting for interrupt...");
+  if (issueToken(targetEndpoint, USB_PID_OUT)) {
+    toggleSend = !toggleSend;
+    return true;
+  } else {
+    return false;
+  }
 }

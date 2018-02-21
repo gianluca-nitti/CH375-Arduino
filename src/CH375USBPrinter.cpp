@@ -24,10 +24,17 @@ bool CH375USBPrinter::init() {
       // thus, if the printer supports larger packets, the bottleneck is the CH375
       uint16_t maxPacketSize = configurationDescriptor.endpoints[i].wMaxPacketSize;
       if (maxPacketSize > 64) {
-        outEndpointMaxPacketSize = 64;
+        packetSize = 64;
       } else {
-        outEndpointMaxPacketSize = (uint8_t) (maxPacketSize & 0x00FF);
+        packetSize = (uint8_t) (maxPacketSize & 0x00FF);
       }
+
+      if (buffer != NULL) {
+        delete[] buffer;
+      }
+      buffer = new uint8_t[packetSize];
+      bufIndex = 0;
+
       return true;
     }
   }
@@ -53,19 +60,26 @@ uint8_t CH375USBPrinter::getPortStatus() {
   return result;
 }
 
-bool CH375USBPrinter::sendData(uint8_t* buf, uint8_t len) {
-  while (len > 0) {
-    ch375.toggleHostEndpoint7(toggleSend);
-    uint8_t packetLen = len > outEndpointMaxPacketSize ? outEndpointMaxPacketSize : len;
-    ch375.wr_usb_data(buf, packetLen);
-    if (ch375.issueToken(outEndpointNumber, USB_PID_OUT)) {
-      len -= packetLen;
-      buf += packetLen;
-      toggleSend = !toggleSend;
-    } else {
-      return false;
-    }
-    //TODO: handle STALL and NAK situations
+bool CH375USBPrinter::write(uint8_t b) {
+  if (bufIndex == packetSize) {
+    if (!flush()) return false;
   }
+  buffer[bufIndex++] = b;
   return true;
+}
+
+bool CH375USBPrinter::flush() {
+  if(!ch375.doBulkOutTransfer(outEndpointNumber, buffer, bufIndex)) {
+    Serial.println("Failed to send USB packet!");
+    return false;
+  }
+  Serial.println("USB packet sent correctly!");
+  bufIndex = 0;
+  return true;
+}
+
+CH375USBPrinter::~CH375USBPrinter() {
+  if (buffer != NULL) {
+    delete[] buffer;
+  }
 }

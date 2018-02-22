@@ -38,6 +38,7 @@ bool CH375USBPrinter::init() {
       return true;
     }
   }
+  Serial.println("no OUT endpoint!");
   return false; //no OUT endpoint found
 }
 
@@ -69,11 +70,7 @@ bool CH375USBPrinter::write(uint8_t b) {
 }
 
 bool CH375USBPrinter::flush() {
-  if(!ch375.doBulkOutTransfer(outEndpointNumber, buffer, bufIndex)) {
-    Serial.println("Failed to send USB packet!");
-    return false;
-  }
-  Serial.println("USB packet sent correctly!");
+  if(!ch375.doBulkOutTransfer(outEndpointNumber, buffer, bufIndex)) return false;
   bufIndex = 0;
   return true;
 }

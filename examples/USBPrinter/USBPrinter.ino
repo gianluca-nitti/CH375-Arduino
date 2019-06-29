@@ -2,8 +2,12 @@
 #include "CH375.h"
 #include "CH375USBPrinter.h"
 
-SoftwareSerial swSer(D6, D3, false, 32);
-CH375 ch375(swSer, D4);
+// ESP8266 example pins
+//SoftwareSerial swSer(D6, D3, false, 32);
+//CH375 ch375(swSer, D4);
+// Arduino AVR example pins
+SoftwareSerial swSer(2, 3, false, 32);
+CH375 ch375(swSer, 4);
 CH375USBPrinter printer(ch375);
 
 void setup() {

@@ -6,7 +6,7 @@
 //SoftwareSerial swSer(D6, D3, false, 32);
 //CH375 ch375(swSer, D4);
 // Arduino AVR example pins
-SoftwareSerial swSer(2, 3, false, 32);
+SoftwareSerial swSer(2, 3, false);
 CH375 ch375(swSer, 4);
 CH375USBPrinter printer(ch375);
 
@@ -84,6 +84,7 @@ void loop() {
       } else {
         Serial.println("Failed");
       }
+    }
 
     /*Serial.println("Setting device address to 3...");
       if (ch375.setAddress(3)) {

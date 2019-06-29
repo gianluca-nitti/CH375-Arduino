@@ -67,15 +67,19 @@ void loop() {
       // simple document in HP page description language
       uint8_t dataToPrint[] = {0x1B, 'E', '\n', '\n', '\n', 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '\n', '\n', 0x1B, 'E'};
       uint8_t len = sizeof(dataToPrint) / sizeof(dataToPrint[0]);
-      if(printer.sendData(dataToPrint, len)) {
-        Serial.println("Succesfully printed!");
-        while (true) delay(1000);
-      } else {
-        Serial.println("Failed to send data to the printer");
+      bool success = true;
+      for (int i = 0; i < len; i++) {
+        if(!printer.write(dataToPrint[i])) {
+          Serial.println("Failed to send data to the printer");
+          success = false;
+          break;
+        }
       }
-    } else {
-      Serial.println("Failed");
-    }
+      if(success) {
+        Serial.println("Succesfully printed!");
+      } else {
+        Serial.println("Failed");
+      }
 
     /*Serial.println("Setting device address to 3...");
       if (ch375.setAddress(3)) {

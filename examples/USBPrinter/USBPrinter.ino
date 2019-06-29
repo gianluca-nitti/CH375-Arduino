@@ -27,7 +27,8 @@ void printHex(String msg, int data) {
 
 void waitSecs(int secs) {
   for (int i = secs; i > 0; i--) {
-    Serial.printf("%d...", i);
+    Serial.print(i);
+    Serial.print("...");
     delay(1000);
   }
 }

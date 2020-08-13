@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "Arduino.h"
 
 #define CH375_CMD_GET_IC_VER 0x01
@@ -105,7 +106,7 @@ class CH375 {
     CH375(Stream& _stream, int _interruptPin);
     bool init();
     bool test();
-    bool setBaudRate(uint32_t baudRate, void (*setLocalBaudRate)(void));
+    bool setBaudRate(uint32_t baudRate, std::function<void(void)> setLocalBaudRate);
     uint8_t getChipVersion();
     void rd_usb_data(uint8_t* buf, uint8_t maxLen);
     void wr_usb_data(uint8_t* buf, uint8_t len);
